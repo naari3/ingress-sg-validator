@@ -1,0 +1,6 @@
+domain: nnn.ed.nico
+layout:
+- go.kubebuilder.io/v3
+projectName: ingress-sg-validator
+repo: github.o-in.dwango.co.jp/naari3/ingress-sg-validator
+version: "3"
