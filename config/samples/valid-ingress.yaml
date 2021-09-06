@@ -4,6 +4,7 @@ metadata:
   name: minimal-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    example-mutating-admission-webhook: "foo"
 spec:
   rules:
   - http:

@@ -78,8 +78,8 @@ func main() {
 
 	//+kubebuilder:scaffold:builder
 
-	pv := v1.NewIngressValidator(mgr.GetClient())
-	mgr.GetWebhookServer().Register("/validate-core-v1-pod", &webhook.Admission{Handler: pv})
+	iv := v1.NewIngressValidator(mgr.GetClient())
+	mgr.GetWebhookServer().Register("/validate-v1-ingress", &webhook.Admission{Handler: iv})
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
