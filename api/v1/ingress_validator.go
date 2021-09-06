@@ -11,7 +11,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// +kubebuilder:webhook:path=/validate-v1-ingress,mutating=false,failurePolicy=fail,groups="networking.k8s.io",resources=ingresses,verbs=create;update,versions=v1,name=ving.kb.io,sideEffects=None,admissionReviewVersions={v1}
+//+kubebuilder:webhook:path=/validate-v1-ingress,mutating=false,failurePolicy=fail,sideEffects=None,groups="networking.k8s.io";"extensions",resources=ingresses,verbs=create;update,versions=v1,name=ving.nnn.ed.nico,admissionReviewVersions={v1,v1beta1}
+
 type IngressValidator struct {
 	Client  client.Client
 	decoder *admission.Decoder
