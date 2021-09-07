@@ -25,8 +25,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.o-in.dwango.co.jp/naari3/ingress-sg-validator/pkg"
 
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -106,7 +108,43 @@ var _ = BeforeSuite(func() {
 
 	//+kubebuilder:scaffold:webhook
 
-	iv := NewIngressValidator(mgr.GetClient())
+	validSGIDs := []string{"sg-1", "sg-2", "sg-3"}
+	validSGNames := []string{"foo1", "foo2", "foo3"}
+	sgs := make([]*ec2.SecurityGroup, len(validSGIDs)+len(validSGNames))
+	for _, sgID := range validSGIDs {
+		sg := ec2.SecurityGroup{
+			Description:         &sgID,
+			GroupId:             &sgID,
+			GroupName:           &sgID,
+			IpPermissions:       nil,
+			IpPermissionsEgress: nil,
+			OwnerId:             nil,
+			Tags:                nil,
+			VpcId:               nil,
+		}
+		sgs = append(sgs, &sg)
+	}
+	count := 0
+	for _, sgName := range validSGNames {
+		ID := fmt.Sprintf("sg-%d", count)
+		sg := ec2.SecurityGroup{
+			Description:         &sgName,
+			GroupId:             &ID,
+			GroupName:           &sgName,
+			IpPermissions:       nil,
+			IpPermissionsEgress: nil,
+			OwnerId:             nil,
+			Tags:                nil,
+			VpcId:               nil,
+		}
+		sgs = append(sgs, &sg)
+		count++
+	}
+	v := pkg.NewValidator(&mockEC2{
+		EC2:   nil,
+		store: sgs,
+	})
+	iv := NewIngressValidator(mgr.GetClient(), v)
 	mgr.GetWebhookServer().Register("/validate-v1-ingress", &webhook.Admission{Handler: iv})
 
 	go func() {

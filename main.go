@@ -22,7 +22,11 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	v1 "github.o-in.dwango.co.jp/naari3/ingress-sg-validator/api/v1"
+	"github.o-in.dwango.co.jp/naari3/ingress-sg-validator/pkg"
+	"github.o-in.dwango.co.jp/naari3/ingress-sg-validator/pkg/aws/services"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -78,7 +82,13 @@ func main() {
 
 	//+kubebuilder:scaffold:builder
 
-	iv := v1.NewIngressValidator(mgr.GetClient())
+	sess, err := session.NewSession(aws.NewConfig())
+	if err != nil {
+		setupLog.Error(err, "can not get AWS session")
+		os.Exit(1)
+	}
+	ec2 := services.NewEC2(sess)
+	iv := v1.NewIngressValidator(mgr.GetClient(), pkg.NewValidator(ec2))
 	mgr.GetWebhookServer().Register("/validate-v1-ingress", &webhook.Admission{Handler: iv})
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
