@@ -3,8 +3,7 @@ kind: Ingress
 metadata:
   name: minimal-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    example-mutating-admission-webhook: "foo"
+    alb.ingress.kubernetes.io/security-groups: "foo"
 spec:
   rules:
   - http:
