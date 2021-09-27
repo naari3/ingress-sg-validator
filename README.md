@@ -14,3 +14,10 @@ $ make deploy
 ```
 $ make test
 ```
+
+## How to publish
+
+```
+$ IMG=naari3/ingress-sg-validator:latest make docker-build
+$ IMG=naari3/ingress-sg-validator:latest make docker-push
+```

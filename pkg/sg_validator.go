@@ -2,12 +2,14 @@ package pkg
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	awssdk "github.com/aws/aws-sdk-go/aws"
 	ec2sdk "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/pkg/errors"
 	"github.o-in.dwango.co.jp/naari3/ingress-sg-validator/pkg/aws/services"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -41,6 +43,8 @@ func (v *SGValidator) ValidateAnnotation(ctx context.Context, ing metav1.Object)
 }
 
 func (v *SGValidator) resolveSecurityGroupIDsViaNameOrIDSlice(ctx context.Context, sgNameOrIDs []string) ([]string, error) {
+	logger := log.FromContext(ctx)
+
 	var sgIDs []string
 	var sgNames []string
 	for _, nameOrID := range sgNameOrIDs {
@@ -55,6 +59,7 @@ func (v *SGValidator) resolveSecurityGroupIDsViaNameOrIDSlice(ctx context.Contex
 		req := &ec2sdk.DescribeSecurityGroupsInput{
 			GroupIds: awssdk.StringSlice(sgIDs),
 		}
+		logger.Info(fmt.Sprintf("sgIds: %v", sgIDs))
 		sgs, err := v.ec2.DescribeSecurityGroupsAsList(ctx, req)
 		if err != nil {
 			return nil, err
@@ -62,6 +67,7 @@ func (v *SGValidator) resolveSecurityGroupIDsViaNameOrIDSlice(ctx context.Contex
 		resolvedSGs = append(resolvedSGs, sgs...)
 	}
 	if len(sgNames) > 0 {
+		logger.Info(fmt.Sprintf("sgNames: %v", sgNames))
 		req := &ec2sdk.DescribeSecurityGroupsInput{
 			Filters: []*ec2sdk.Filter{
 				{
